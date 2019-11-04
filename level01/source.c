@@ -2,38 +2,36 @@
 
 char a_user_name[256];
 
-int verify_user_pass(char *password)
-{
-  return (strncmp(password, "admin"));
-}
-
 int verify_user_name(void)
 {
   puts("verifying username....\n");
-  return (strncmp(a_user_name, "dat_wil", 7));
+  return (strcmp("dat_wil", a_user_name));
+}
+
+int verify_user_pass(char *password)
+{
+  return (strcmp("admin", password));
 }
 
 int main(void)
 {
-  int ret;
   char password[16];
+  int ret;
 
   puts("********* ADMIN LOGIN PROMPT *********");
-  printf("Enter Username: ");
-  fgets(a_user_name, 256, stdin);
 
+  printf("Enter Username: ");
+  fgets(a_user_name, 256, 0);
   ret = verify_user_name();
+
   if (ret == 0)
   {
     puts("Enter Password: ");
-    fgets(password, 100, stdin);
-
+    fgets(password, 100, 0);
     ret = verify_user_pass(password);
-    if ((ret == 0) || (ret != 0))
+    if (ret == 0 || ret != 0)
       puts("nope, incorrect password...\n");
   }
-  else
-    puts("nope, incorrect username...\n");
-
-  return ret;
+  puts("nope, incorrect username...\n");
+  return (ret);
 }

