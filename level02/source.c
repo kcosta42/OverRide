@@ -3,9 +3,9 @@
 
 int main(void)
 {
-  char *username;
-  char *password;
-  char *true_password;
+  char username[100];
+  char password[100];
+  char true_password[42];
   size_t len;
   size_t idx;
   FILE *fs;
