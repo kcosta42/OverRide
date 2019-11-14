@@ -281,3 +281,5 @@ End of assembler dump.
 
 memset(argv, 0)
 memset(env, 0)
+
+# 0xffffd5d8 <== index 1 buffer

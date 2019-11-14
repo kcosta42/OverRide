@@ -196,7 +196,3 @@ Dump of assembler code for function decrypt:
    0x08048745 <+229>:	pop    ebp
    0x08048746 <+230>:	ret
 End of assembler dump.
-
-$> for i in range {322424824..322424845}; do (python -c  "print $i"; cat -) | ./level03 ; done
-$ cat /home/users/level04/.pass
-kgv3tkEb9h2mLkRsPkXRfc2mHbjMxQzvb2FrgKkf

