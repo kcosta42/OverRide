@@ -1,0 +1,23 @@
+Dump of assembler code for function handle_msg:
+   0x00005555555548c0 <+0>:	push   rbp
+   0x00005555555548c1 <+1>:	mov    rbp,rsp
+   0x00005555555548c4 <+4>:	sub    rsp,0xc0
+   0x00005555555548cb <+11>:	lea    rax,[rbp-0xc0]                           ; struct msg 192 bytes
+   0x00005555555548d2 <+18>:	add    rax,0x8c                                 ; 140 bytes
+   0x00005555555548d8 <+24>:	mov    QWORD PTR [rax],0x0
+   0x00005555555548df <+31>:	mov    QWORD PTR [rax+0x8],0x0
+   0x00005555555548e7 <+39>:	mov    QWORD PTR [rax+0x10],0x0
+   0x00005555555548ef <+47>:	mov    QWORD PTR [rax+0x18],0x0
+   0x00005555555548f7 <+55>:	mov    QWORD PTR [rax+0x20],0x0                 ; 40 bytes
+   0x00005555555548ff <+63>:	mov    DWORD PTR [rbp-0xc],0x8c                 ; 8 bytes
+   0x0000555555554906 <+70>:	lea    rax,[rbp-0xc0]                           ; load struct msg
+   0x000055555555490d <+77>:	mov    rdi,rax
+   0x0000555555554910 <+80>:	call   0x5555555549cd <set_username>            ; set_username(struct)
+   0x0000555555554915 <+85>:	lea    rax,[rbp-0xc0]
+   0x000055555555491c <+92>:	mov    rdi,rax
+   0x000055555555491f <+95>:	call   0x555555554932 <set_msg>                 ; set_msg(struct)
+   0x0000555555554924 <+100>:	lea    rdi,[rip+0x295]        # 0x555555554bc0  ; ">: Msg sent!"
+   0x000055555555492b <+107>:	call   0x555555554730 <puts@plt>                ; puts(">: Msg sent!")
+   0x0000555555554930 <+112>:	leave
+   0x0000555555554931 <+113>:	ret
+End of assembler dump.

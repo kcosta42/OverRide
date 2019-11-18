@@ -1,0 +1,18 @@
+Dump of assembler code for function get_unum:
+   0x080485e7 <+0>:	push   ebp
+   0x080485e8 <+1>:	mov    ebp,esp
+   0x080485ea <+3>:	sub    esp,0x28
+   0x080485ed <+6>:	mov    DWORD PTR [ebp-0xc],0x0
+   0x080485f4 <+13>:	mov    eax,ds:0x804a060               ; stdout
+   0x080485f9 <+18>:	mov    DWORD PTR [esp],eax
+   0x080485fc <+21>:	call   0x8048480 <fflush@plt>         ; fflush(stdout)
+   0x08048601 <+26>:	mov    eax,0x8048ad0                  ; "%u"
+   0x08048606 <+31>:	lea    edx,[ebp-0xc]
+   0x08048609 <+34>:	mov    DWORD PTR [esp+0x4],edx
+   0x0804860d <+38>:	mov    DWORD PTR [esp],eax
+   0x08048610 <+41>:	call   0x8048500 <__isoc99_scanf@plt> ; scanf("%u", value)
+   0x08048615 <+46>:	call   0x80485c4 <clear_stdin>        ; clear_stdin()
+   0x0804861a <+51>:	mov    eax,DWORD PTR [ebp-0xc]
+   0x0804861d <+54>:	leave
+   0x0804861e <+55>:	ret                                   ; return value
+End of assembler dump.

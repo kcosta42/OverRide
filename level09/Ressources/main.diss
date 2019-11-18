@@ -1,0 +1,10 @@
+Dump of assembler code for function main:
+   0x0000555555554aa8 <+0>:	push   rbp
+   0x0000555555554aa9 <+1>:	mov    rbp,rsp
+   0x0000555555554aac <+4>:	lea    rdi,[rip+0x15d]        # 0x555555554c10  ; '-' <repeats 44 times>, "\n|   ~Welcome to l33t-m$n ~    v1337        |\n", '-' <repeats 44 times>
+   0x0000555555554ab3 <+11>:	call   0x555555554730 <puts@plt>              ; puts("--------------------------------------------\n|   ~Welcome to l33t-m$n ~    v1337       |\n--------------------------------------------")
+   0x0000555555554ab8 <+16>:	call   0x5555555548c0 <handle_msg>            ; handle_msg()
+   0x0000555555554abd <+21>:	mov    eax,0x0
+   0x0000555555554ac2 <+26>:	pop    rbp
+   0x0000555555554ac3 <+27>:	ret
+End of assembler dump.

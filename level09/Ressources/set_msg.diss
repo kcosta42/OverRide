@@ -1,0 +1,36 @@
+Dump of assembler code for function set_msg:
+   0x0000555555554932 <+0>:	push   rbp
+   0x0000555555554933 <+1>:	mov    rbp,rsp
+   0x0000555555554936 <+4>:	sub    rsp,0x410
+   0x000055555555493d <+11>:	mov    QWORD PTR [rbp-0x408],rdi                      ; msg
+   0x0000555555554944 <+18>:	lea    rax,[rbp-0x400]                                ; local_msg
+   0x000055555555494b <+25>:	mov    rsi,rax
+   0x000055555555494e <+28>:	mov    eax,0x0
+   0x0000555555554953 <+33>:	mov    edx,0x80
+   0x0000555555554958 <+38>:	mov    rdi,rsi
+   0x000055555555495b <+41>:	mov    rcx,rdx
+   0x000055555555495e <+44>:	rep stos QWORD PTR es:[rdi],rax                       ; memset(local_msg, 128, 0)
+   0x0000555555554961 <+47>:	lea    rdi,[rip+0x265]        # 0x555555554bcd        ; ">: Msg @Unix-Dude"
+   0x0000555555554968 <+54>:	call   0x555555554730 <puts@plt>                      ; puts(">: Msg @Unix-Dude")
+   0x000055555555496d <+59>:	lea    rax,[rip+0x26b]        # 0x555555554bdf        ; ">>: "
+   0x0000555555554974 <+66>:	mov    rdi,rax
+   0x0000555555554977 <+69>:	mov    eax,0x0
+   0x000055555555497c <+74>:	call   0x555555554750 <printf@plt>                    ; printf(">>: ")
+   0x0000555555554981 <+79>:	mov    rax,QWORD PTR [rip+0x201630] # 0x555555755fb8  ; stdin
+   0x0000555555554988 <+86>:	mov    rax,QWORD PTR [rax]
+   0x000055555555498b <+89>:	mov    rdx,rax
+   0x000055555555498e <+92>:	lea    rax,[rbp-0x400]                                ; local_msg
+   0x0000555555554995 <+99>:	mov    esi,0x400
+   0x000055555555499a <+104>:	mov    rdi,rax
+   0x000055555555499d <+107>:	call   0x555555554770 <fgets@plt>                     ; fgets(local_msg, 0x400, stdin)
+   0x00005555555549a2 <+112>:	mov    rax,QWORD PTR [rbp-0x408]                      ; msg
+   0x00005555555549a9 <+119>:	mov    eax,DWORD PTR [rax+0xb4]
+   0x00005555555549af <+125>:	movsxd rdx,eax
+   0x00005555555549b2 <+128>:	lea    rcx,[rbp-0x400]                                ; local_msg
+   0x00005555555549b9 <+135>:	mov    rax,QWORD PTR [rbp-0x408]                      ; msg
+   0x00005555555549c0 <+142>:	mov    rsi,rcx
+   0x00005555555549c3 <+145>:	mov    rdi,rax
+   0x00005555555549c6 <+148>:	call   0x555555554720 <strncpy@plt>                   ; strcpy(msg->content, local_msg, msg->size)
+   0x00005555555549cb <+153>:	leave
+   0x00005555555549cc <+154>:	ret
+End of assembler dump.

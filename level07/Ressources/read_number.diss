@@ -1,0 +1,24 @@
+Dump of assembler code for function read_number:
+   0x080486d7 <+0>:	push   ebp
+   0x080486d8 <+1>:	mov    ebp,esp
+   0x080486da <+3>:	sub    esp,0x28
+   0x080486dd <+6>:	mov    DWORD PTR [ebp-0xc],0x0
+   0x080486e4 <+13>:	mov    eax,0x8048add              ; " Index: "
+   0x080486e9 <+18>:	mov    DWORD PTR [esp],eax
+   0x080486ec <+21>:	call   0x8048470 <printf@plt>     ; printf(" Index: ")
+   0x080486f1 <+26>:	call   0x80485e7 <get_unum>       ; idx = get_unum()
+   0x080486f6 <+31>:	mov    DWORD PTR [ebp-0xc],eax
+   0x080486f9 <+34>:	mov    eax,DWORD PTR [ebp-0xc]
+   0x080486fc <+37>:	shl    eax,0x2                    ; idx << 0x2 (idx * 4)
+   0x080486ff <+40>:	add    eax,DWORD PTR [ebp+0x8]    ; idx * 4 + array
+   0x08048702 <+43>:	mov    edx,DWORD PTR [eax]
+   0x08048704 <+45>:	mov    eax,0x8048b1b              ; " Number at data[%u] is %u\n"
+   0x08048709 <+50>:	mov    DWORD PTR [esp+0x8],edx
+   0x0804870d <+54>:	mov    edx,DWORD PTR [ebp-0xc]
+   0x08048710 <+57>:	mov    DWORD PTR [esp+0x4],edx
+   0x08048714 <+61>:	mov    DWORD PTR [esp],eax
+   0x08048717 <+64>:	call   0x8048470 <printf@plt>     ; printf(" Number at data[%u] is %u\n", idx, *(array + idx * 4))
+   0x0804871c <+69>:	mov    eax,0x0
+   0x08048721 <+74>:	leave
+   0x08048722 <+75>:	ret
+End of assembler dump.

@@ -1,0 +1,49 @@
+Dump of assembler code for function store_number:
+   0x08048630 <+0>:	push   ebp
+   0x08048631 <+1>:	mov    ebp,esp
+   0x08048633 <+3>:	sub    esp,0x28
+   0x08048636 <+6>:	mov    DWORD PTR [ebp-0x10],0x0
+   0x0804863d <+13>:	mov    DWORD PTR [ebp-0xc],0x0
+   0x08048644 <+20>:	mov    eax,0x8048ad3              ; " Number: "
+   0x08048649 <+25>:	mov    DWORD PTR [esp],eax
+   0x0804864c <+28>:	call   0x8048470 <printf@plt>     ; printf(" Number: ")
+   0x08048651 <+33>:	call   0x80485e7 <get_unum>       ; value = get_unum()
+   0x08048656 <+38>:	mov    DWORD PTR [ebp-0x10],eax
+   0x08048659 <+41>:	mov    eax,0x8048add              ; " Index: "
+   0x0804865e <+46>:	mov    DWORD PTR [esp],eax
+   0x08048661 <+49>:	call   0x8048470 <printf@plt>     ; printf(" Index: ")
+   0x08048666 <+54>:	call   0x80485e7 <get_unum>       ; idx = get_unum()
+   0x0804866b <+59>:	mov    DWORD PTR [ebp-0xc],eax
+   0x0804866e <+62>:	mov    ecx,DWORD PTR [ebp-0xc]    ; idx
+   0x08048671 <+65>:	mov    edx,0xaaaaaaab
+   0x08048676 <+70>:	mov    eax,ecx
+   0x08048678 <+72>:	mul    edx
+   0x0804867a <+74>:	shr    edx,1
+   0x0804867c <+76>:	mov    eax,edx
+   0x0804867e <+78>:	add    eax,eax
+   0x08048680 <+80>:	add    eax,edx
+   0x08048682 <+82>:	mov    edx,ecx
+   0x08048684 <+84>:	sub    edx,eax
+   0x08048686 <+86>:	test   edx,edx                      ; idx % 3 == 0
+   0x08048688 <+88>:	je     0x8048697 <store_number+103>
+   0x0804868a <+90>:	mov    eax,DWORD PTR [ebp-0x10]     ; value
+   0x0804868d <+93>:	shr    eax,0x18
+   0x08048690 <+96>:	cmp    eax,0xb7                     ; value >> 0x18 == 0xb7
+   0x08048695 <+101>:	jne    0x80486c2 <store_number+146>
+   0x08048697 <+103>:	mov    DWORD PTR [esp],0x8048ae6    ; " *** ERROR! ***"
+   0x0804869e <+110>:	call   0x80484c0 <puts@plt>         ; puts(" *** ERROR! ***")
+   0x080486a3 <+115>:	mov    DWORD PTR [esp],0x8048af8    ; "   This index is reserved for wil!"
+   0x080486aa <+122>:	call   0x80484c0 <puts@plt>         ; puts("   This index is reserved for wil!")
+   0x080486af <+127>:	mov    DWORD PTR [esp],0x8048ae6    ; " *** ERROR! ***"
+   0x080486b6 <+134>:	call   0x80484c0 <puts@plt>         ; puts(" *** ERROR! ***")
+   0x080486bb <+139>:	mov    eax,0x1
+   0x080486c0 <+144>:	jmp    0x80486d5 <store_number+165>
+   0x080486c2 <+146>:	mov    eax,DWORD PTR [ebp-0xc]
+   0x080486c5 <+149>:	shl    eax,0x2
+   0x080486c8 <+152>:	add    eax,DWORD PTR [ebp+0x8]
+   0x080486cb <+155>:	mov    edx,DWORD PTR [ebp-0x10]
+   0x080486ce <+158>:	mov    DWORD PTR [eax],edx
+   0x080486d0 <+160>:	mov    eax,0x0
+   0x080486d5 <+165>:	leave
+   0x080486d6 <+166>:	ret
+End of assembler dump.
