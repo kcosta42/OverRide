@@ -1,4 +1,4 @@
-# A called to `gets` is made which is vunerable to stack overflow
+# A called to `gets` is made which is vunerable to overflow
 gdb> disass main
 [...]
    0x0804875e <+150>:	call   0x80484b0 <gets@plt>         ; gets(shellcode)
