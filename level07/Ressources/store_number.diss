@@ -39,8 +39,8 @@ Dump of assembler code for function store_number:
    0x080486bb <+139>:	mov    eax,0x1
    0x080486c0 <+144>:	jmp    0x80486d5 <store_number+165>
    0x080486c2 <+146>:	mov    eax,DWORD PTR [ebp-0xc]
-   0x080486c5 <+149>:	shl    eax,0x2
-   0x080486c8 <+152>:	add    eax,DWORD PTR [ebp+0x8]
+   0x080486c5 <+149>:	shl    eax,0x2                      ; idx << 0x2 (idx * 4)
+   0x080486c8 <+152>:	add    eax,DWORD PTR [ebp+0x8]      ; idx * 4 + array
    0x080486cb <+155>:	mov    edx,DWORD PTR [ebp-0x10]
    0x080486ce <+158>:	mov    DWORD PTR [eax],edx
    0x080486d0 <+160>:	mov    eax,0x0

