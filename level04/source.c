@@ -8,8 +8,9 @@
 
 int main(void)
 {
+  int   status;
   pid_t pid;
-  char shellcode[32];
+  char  shellcode[32];
 
   pid = fork();
   if (pid == 0)
@@ -21,18 +22,17 @@ int main(void)
   }
   else
   {
-    do {
-      wait(&local_a4);
-      local_20 = local_a4;
-      if (((local_a4 & 0x7f) == 0) ||
-         (local_1c = local_a4, '\0' < (char)(((byte)local_a4 & 0x7f) + 1) >> 1)) {
+    do
+    {
+      wait(&status);
+      if ((status & 0x7f) == 0)
+      {
         puts("child is exiting...");
         return 0;
       }
-      local_18 = ptrace(PTRACE_PEEKUSER,local_14,0x2c,0);
-    } while (local_18 != 0xb);
+    } while (ptrace(PTRACE_PEEKUSER, pid, 0x2c, 0) != 0xb)
     puts("no exec() for you");
-    kill(local_14,9);
+    kill(pid, 0x9);
   }
   return (0);
 }

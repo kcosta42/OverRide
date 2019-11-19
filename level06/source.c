@@ -21,7 +21,7 @@ int auth(char *login, unsigned int serial)
     ret = 1;
   }
   else
-    ret = serial == hash(login);
+    ret = (serial == hash(login));
   return ret;
 }
 

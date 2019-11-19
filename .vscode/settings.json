@@ -3,6 +3,7 @@
     "stdio.h": "c",
     "cdefs.h": "c",
     "stdlib.h": "c",
-    "fcntl.h": "c"
+    "fcntl.h": "c",
+    "string.h": "c"
   }
 }
